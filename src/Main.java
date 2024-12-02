@@ -1,5 +1,7 @@
 //TIP To <b>Run</b> code, press <shortcut actionId="Run"/> or
 // click the <icon src="AllIcons.Actions.Execute"/> icon in the gutter.
+import org.w3c.dom.ls.LSOutput;
+
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -52,11 +54,13 @@ class Contact{
         System.out.println("Email: "+email);
     }
 }
-class AddressBook{
+class AddressBook {
     private List<Contact> contactList;
-    public AddressBook(){
+
+    public AddressBook() {
         this.contactList = new ArrayList<>();
     }
+
     public void addContact() throws IOException {
         BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
 
@@ -81,25 +85,27 @@ class AddressBook{
         contactList.add(contact);
         System.out.println("Contact added Successfully");
     }
+
     public void displayContact() {
-        if (contactList == null) {
+        if (contactList.isEmpty()) {
             System.out.println("No contacts to display.");
-        }else {
-            System.out.println("\nAddress Book Contacts: ");
-            for (Contact contact : contactList){
+        } else {
+            System.out.println("\nAddress Book Contacts:- ");
+            for (Contact contact : contactList) {
                 contact.displayContact();
             }
         }
     }
-    public void editContact(){
+
+    public void editContact() {
         Scanner sc = new Scanner((System.in));
         System.out.println("Editing contact First Name: ");
         String firstname = sc.nextLine();
         System.out.println("Editing contact Last Name: ");
         String lastname = sc.nextLine();
 
-        for(Contact contact : contactList){
-            if (contact.getFirst_name().equalsIgnoreCase(firstname) && contact.getLast_name().equalsIgnoreCase(lastname)){
+        for (Contact contact : contactList) {
+            if (contact.getFirst_name().equalsIgnoreCase(firstname) && contact.getLast_name().equalsIgnoreCase(lastname)) {
                 System.out.println("Enter New Address: ");
                 String address = sc.nextLine();
                 System.out.println("Enter new City: ");
@@ -121,40 +127,65 @@ class AddressBook{
         System.out.println("Contact not found.");
 
     }
-}
-public class Main {
-    public static void main(String[] args) throws IOException {
-        System.out.println("Welcome to Address Book Program");
-        AddressBook ab = new AddressBook();
+
+    public void deleteContact() {
         Scanner sc = new Scanner(System.in);
 
-        while (true) {
-            System.out.println("\n*** Menu ***");
-            System.out.println("1. Add Contact");
-            System.out.println("2. Display Contact");
-            System.out.println("3. Update Contact");
-            System.out.println("4. Exit");
-            System.out.print("Choose an option: ");
-            int choice = sc.nextInt();
-            switch (choice) {
-                case 1:
-                    ab.addContact();
-                    break;
+        System.out.println("Enter the First name of the contact to delete: ");
+        String firstname = sc.nextLine();
+        System.out.println("Enter the Last name of the contact to delete: ");
+        String lastname = sc.nextLine();
 
-                case 2:
-                    ab.displayContact();
-                    break;
-                case 3:
-                    ab.editContact();
-                    break;
-                case 4:
-                    System.out.println("Exiting...");
-                    sc.close();
-                    return;
+        for (int i = 0; i < contactList.size(); i++) {
+            Contact contact = contactList.get(i);
+            if (contact.getFirst_name().equalsIgnoreCase(firstname) && contact.getLast_name().equalsIgnoreCase(lastname)) {
+                contactList.remove(i);
+                System.out.println("Contact deleted successfully.");
+                return;
+            }
+        }
+        System.out.println("Contacts not found.");
 
-                default:
-                    System.out.println("Invalid Input");
+    }
+}
+
+    public class Main {
+        public static void main(String[] args) throws IOException {
+            System.out.println("Welcome to Address Book Program");
+            AddressBook ab = new AddressBook();
+            Scanner sc = new Scanner(System.in);
+
+            while (true) {
+                System.out.println("\n*** Menu ***");
+                System.out.println("1. Add Contact");
+                System.out.println("2. Display Contact");
+                System.out.println("3. Update Contact");
+                System.out.println("4. Delete Contact");
+                System.out.println("5. Exit");
+                System.out.print("Choose an option: ");
+                int choice = sc.nextInt();
+                switch (choice) {
+                    case 1:
+                        ab.addContact();
+                        break;
+
+                    case 2:
+                        ab.displayContact();
+                        break;
+                    case 3:
+                        ab.editContact();
+                        break;
+                    case 4:
+                        ab.deleteContact();
+                        break;
+                    case 5:
+                        System.out.println("Exiting...");
+                        sc.close();
+                        return;
+
+                    default:
+                        System.out.println("Invalid Input");
+                }
             }
         }
     }
-}
