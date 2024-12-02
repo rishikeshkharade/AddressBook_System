@@ -3,7 +3,6 @@
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.sql.SQLOutput;
 import java.util.*;
 
 class Contact{
@@ -26,6 +25,22 @@ class Contact{
         this.phone_number = phone_number;
         this.email = email;
     }
+    public String getFirst_name(){
+        return first_name;
+    }
+    public String getLast_name(){
+        return last_name;
+    }
+
+    public void updatedContact(String address, String city, String state, int zip, long phone_number, String email){
+        this.address = address;
+        this.city = city;
+        this.state = state;
+        this.zip = zip;
+        this.phone_number = phone_number;
+        this.email = email;
+    }
+
     public void displayContact(){
         System.out.println("Contact Details: ");
         System.out.println("Name: "+ first_name+" "+last_name);
@@ -38,7 +53,10 @@ class Contact{
     }
 }
 class AddressBook{
-    private Contact contact;
+    private List<Contact> contactList;
+    public AddressBook(){
+        this.contactList = new ArrayList<>();
+    }
     public void addContact() throws IOException {
         BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
 
@@ -59,15 +77,49 @@ class AddressBook{
         System.out.println("Enter Phone Number: ");
         long phone_number = Long.parseLong(br.readLine());
 
-        contact = new Contact(firstName, lastName, address, city, state, zip, phone_number, email);
+        Contact contact = new Contact(firstName, lastName, address, city, state, zip, phone_number, email);
+        contactList.add(contact);
         System.out.println("Contact added Successfully");
     }
     public void displayContact() {
-        if (contact != null) {
-            contact.displayContact();
-        } else {
+        if (contactList == null) {
             System.out.println("No contacts to display.");
+        }else {
+            System.out.println("\nAddress Book Contacts: ");
+            for (Contact contact : contactList){
+                contact.displayContact();
+            }
         }
+    }
+    public void editContact(){
+        Scanner sc = new Scanner((System.in));
+        System.out.println("Editing contact First Name: ");
+        String firstname = sc.nextLine();
+        System.out.println("Editing contact Last Name: ");
+        String lastname = sc.nextLine();
+
+        for(Contact contact : contactList){
+            if (contact.getFirst_name().equalsIgnoreCase(firstname) && contact.getLast_name().equalsIgnoreCase(lastname)){
+                System.out.println("Enter New Address: ");
+                String address = sc.nextLine();
+                System.out.println("Enter new City: ");
+                String city = sc.nextLine();
+                System.out.println("Enter new state: ");
+                String state = sc.nextLine();
+                System.out.println("Enter zip code: ");
+                int zip = sc.nextInt();
+                System.out.println("Enter new Phone Number: ");
+                long phone_number = sc.nextLong();
+                System.out.println("Enter new Mail Id: ");
+                String mail = sc.nextLine();
+
+                contact.updatedContact(address, city, state, zip, phone_number, mail);
+                System.out.println("Contact updated Successfully");
+                return;
+            }
+        }
+        System.out.println("Contact not found.");
+
     }
 }
 public class Main {
@@ -77,10 +129,11 @@ public class Main {
         Scanner sc = new Scanner(System.in);
 
         while (true) {
-            System.out.println("\n   2Menu");
+            System.out.println("\n*** Menu ***");
             System.out.println("1. Add Contact");
             System.out.println("2. Display Contact");
-            System.out.println("3. Exit");
+            System.out.println("3. Update Contact");
+            System.out.println("4. Exit");
             System.out.print("Choose an option: ");
             int choice = sc.nextInt();
             switch (choice) {
@@ -92,9 +145,13 @@ public class Main {
                     ab.displayContact();
                     break;
                 case 3:
+                    ab.editContact();
+                    break;
+                case 4:
                     System.out.println("Exiting...");
                     sc.close();
                     return;
+
                 default:
                     System.out.println("Invalid Input");
             }
