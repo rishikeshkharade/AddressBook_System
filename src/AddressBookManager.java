@@ -6,6 +6,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.*;
+import java.util.stream.Collectors;
 
 class Contact{
     private String firstName;
@@ -32,6 +33,25 @@ class Contact{
     }
     public String getLast_name(){
         return lastName;
+    }
+    public String getCity(){
+        return city;
+    }
+    public String getState(){
+        return state;
+    }
+
+    @Override
+    public boolean equals(Object obj){
+        if (this == obj) return true;
+        if (obj == null || getClass() != obj.getClass()) return false;
+        Contact contact = (Contact) obj;
+        return firstName.equalsIgnoreCase(contact.firstName) && lastName.equalsIgnoreCase(contact.lastName);
+    }
+
+    @Override
+    public int hashCode(){
+        return Objects.hash(firstName.toLowerCase(), lastName.toLowerCase());
     }
 
     public void updatedContact(String address, String city, String state, int zip, long phone_number, String email){
@@ -83,15 +103,24 @@ class AddressBook {
             System.out.println("Enter Phone Number: ");
             long phone_number = Long.parseLong(br.readLine());
 
-            Contact contact = new Contact(firstName, lastName, address, city, state, zip, phone_number, email);
-            contactList.add(contact);
-            System.out.println("Contact added Successfully");
+            Contact newContact = new Contact(firstName, lastName, address, city, state, zip, phone_number, email);
+            boolean exists = contactList.stream().anyMatch(contact -> contact.equals(newContact));
 
+            if (exists) {
+                System.out.println("Contact with this name already exists. Please enter a different contact.");
+            } else {
+                contactList.add(newContact);
+                System.out.println("Contact added Successfully");
+            }
             System.out.println("Do you want to add another contact? (yes/no)");
             addMore = br.readLine();
         } while (addMore.equalsIgnoreCase("yes"));
     }
-    public void displayContact() {
+
+    public List<Contact> getContact () {
+            return contactList;
+        }
+     public void displayContact() {
         if (contactList.isEmpty()) {
             System.out.println("No contacts to display.");
         } else {
@@ -156,32 +185,39 @@ class AddressBook {
 class AddressBookManager {
     private Map<String, AddressBook> addressBooks;
 
-    public AddressBookManager(){
+    public AddressBookManager() {
         this.addressBooks = new HashMap<>();
     }
 
-    public void createAddressBook(String name){
-        if (!addressBooks.containsKey(name)){
+    public void createAddressBook(String name) {
+        if (!addressBooks.containsKey(name)) {
             addressBooks.put(name, new AddressBook());
-            System.out.println("Address Book "+name+" created successfully.");
-        }else {
+            System.out.println("Address Book " + name + " created successfully.");
+        } else {
             System.out.println("Address Book with this name already exists.");
         }
     }
 
-    public AddressBook getAddressBooks(String name){
+    public AddressBook getAddressBooks(String name) {
         return addressBooks.get(name);
     }
 
-    public void displayAddressBooks(){
-        if (addressBooks.isEmpty()){
+    public void displayAddressBooks() {
+        if (addressBooks.isEmpty()) {
             System.out.println("No Address Books available.");
-        }else {
+        } else {
             System.out.println("Available Address Books:");
-            for (String name : addressBooks.keySet()){
-                System.out.println("- "+name);
+            for (String name : addressBooks.keySet()) {
+                System.out.println("- " + name);
             }
         }
+    }
+
+    public List<Contact> searchByCityOrState(String city, String state) {
+        return addressBooks.values().stream()
+                .flatMap(addressBook -> addressBook.getContact().stream())
+                .filter(Contact -> Contact.getCity().equalsIgnoreCase(city) || Contact.getState().equalsIgnoreCase(state))
+                .collect(Collectors.toList());
     }
         public static void main(String[] args) throws IOException {
             System.out.println("Welcome to Address Book Program");
@@ -197,7 +233,8 @@ class AddressBookManager {
                 System.out.println("4. Edit Contact in Address Book");
                 System.out.println("5. Delete Available Address Books");
                 System.out.println("6. Display Available Address Books");
-                System.out.println("7. Exit");
+                System.out.println("7. Search contacts by City or State");
+                System.out.println("8. Exit");
                 System.out.println("Choose an option: ");
                 option = scanner.nextLine();
 
@@ -259,6 +296,20 @@ class AddressBookManager {
                         break;
 
                     case "7":
+                        System.out.println("Enter city to search");
+                        String searchCity = scanner.nextLine();
+                        System.out.println("Enter state to search: ");
+                        String searchState = scanner.nextLine();
+                        List<Contact> searchResults = manager.searchByCityOrState(searchCity,searchState);
+                        if (searchResults.isEmpty()){
+                            System.out.println("No contacts found in the specified city or state.");
+                        }else {
+                            System.out.println("Search Results");
+                            searchResults.forEach(Contact::displayContact);
+                        }
+                        break;
+
+                    case "8":
 
                         System.out.println("Exiting...");
                         scanner.close();
