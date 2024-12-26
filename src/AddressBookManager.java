@@ -28,10 +28,10 @@ class Contact{
         this.phoneNumber = phoneNumber;
         this.email = email;
     }
-    public String getFirst_name(){
+    public String getFirstname(){
         return firstName;
     }
-    public String getLast_name(){
+    public String getLastname(){
         return lastName;
     }
     public String getCity(){
@@ -39,6 +39,19 @@ class Contact{
     }
     public String getState(){
         return state;
+    }
+
+    @Override
+    public String toString(){
+        return "Contact Details: "+
+                "\nName: "+ firstName + " "+lastName+
+                "\nAddress: "+address+
+                "\nCity: "+city+
+                "\nState: "+state+
+                "\nZip: "+zip+
+                "\nPhone Number: "+phoneNumber+
+                "\nEmail: "+email;
+
     }
 
     @Override
@@ -108,9 +121,7 @@ class AddressBook {
             long phone_number = Long.parseLong(br.readLine());
 
             Contact newContact = new Contact(firstName, lastName, address, city, state, zip, phone_number, email);
-
             boolean exists = contactList.stream().anyMatch(contact -> contact.equals(newContact));
-
             if (exists) {
                 System.out.println("Contact with this name already exists. Please enter a different contact.");
             } else {
@@ -123,6 +134,19 @@ class AddressBook {
             System.out.println("Do you want to add another contact? (yes/no)");
             addMore = br.readLine();
         } while (addMore.equalsIgnoreCase("yes"));
+    }
+
+    public void displaySortedContacts(){
+        List<Contact> sortedContacts = contactList.stream()
+                .sorted(Comparator.comparing(Contact::getFirstname).thenComparing(Contact::getLastname))
+                .collect(Collectors.toList());
+
+        if (sortedContacts.isEmpty()){
+            System.out.println("No contacts to display.");
+        }else {
+            System.out.println("\nSorted Address Book Contacts:");
+            sortedContacts.forEach(System.out::println);
+        }
     }
 
     public void displayContactByCity(String city){
@@ -175,7 +199,7 @@ class AddressBook {
         String lastname = sc.nextLine();
 
         for (Contact contact : contactList) {
-            if (contact.getFirst_name().equalsIgnoreCase(firstname) && contact.getLast_name().equalsIgnoreCase(lastname)) {
+            if (contact.getFirstname().equalsIgnoreCase(firstname) && contact.getLastname().equalsIgnoreCase(lastname)) {
                 System.out.println("Enter New Address: ");
                 String address = sc.nextLine();
                 System.out.println("Enter new City: ");
@@ -207,7 +231,7 @@ class AddressBook {
 
         for (int i = 0; i < contactList.size(); i++) {
             Contact contact = contactList.get(i);
-            if (contact.getFirst_name().equalsIgnoreCase(firstname) && contact.getLast_name().equalsIgnoreCase(lastname)) {
+            if (contact.getFirstname().equalsIgnoreCase(firstname) && contact.getLastname().equalsIgnoreCase(lastname)) {
                 contactList.remove(i);
                 System.out.println("Contact deleted successfully.");
                 return;
@@ -273,8 +297,9 @@ class AddressBookManager {
                 System.out.println("8. Display Contacts by State");
                 System.out.println("9. Count Contacts by City");
                 System.out.println("10. Count Contacts by State");
-                System.out.println("11. Display Available Address Books");
-                System.out.println("12. Exit");
+                System.out.println("11. Display Sorted Contacts");
+                System.out.println("12. Display Available Address Books");
+                System.out.println("13. Exit");
                 System.out.println("Choose an option: ");
                 option = scanner.nextLine();
 
@@ -397,9 +422,20 @@ class AddressBookManager {
                         break;
 
                     case "11":
+                        System.out.println("Enter the AddressBook name: ");
+                        String sortBookName = scanner.nextLine();
+                        AddressBook sortedName = manager.getAddressBooks(sortBookName);
+                        if (sortedName!=null){
+                            sortedName.displaySortedContacts();
+                        }else {
+                            System.out.println("Address Book not found.");
+                        }
+                        break;
+
+                    case "12":
                         manager.displayAddressBooks();
                         break;
-                    case "12":
+                    case "13":
 
                         System.out.println("Exiting...");
                         scanner.close();
