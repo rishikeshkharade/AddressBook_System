@@ -76,9 +76,13 @@ class Contact{
 }
 class AddressBook {
     private List<Contact> contactList;
+    private Map<String, List<Contact>> cityMap;
+    private Map<String, List<Contact>> stateMap;
 
     public AddressBook() {
         this.contactList = new ArrayList<>();
+        this.cityMap = new HashMap<>();
+        this.stateMap = new HashMap<>();
     }
 
     public void addContact() throws IOException {
@@ -104,6 +108,7 @@ class AddressBook {
             long phone_number = Long.parseLong(br.readLine());
 
             Contact newContact = new Contact(firstName, lastName, address, city, state, zip, phone_number, email);
+
             boolean exists = contactList.stream().anyMatch(contact -> contact.equals(newContact));
 
             if (exists) {
@@ -112,9 +117,32 @@ class AddressBook {
                 contactList.add(newContact);
                 System.out.println("Contact added Successfully");
             }
+
+            cityMap.computeIfAbsent(city.toLowerCase(), k -> new ArrayList<>()).add(newContact);
+            stateMap.computeIfAbsent(state.toLowerCase(), k-> new ArrayList<>()).add(newContact);
             System.out.println("Do you want to add another contact? (yes/no)");
             addMore = br.readLine();
         } while (addMore.equalsIgnoreCase("yes"));
+    }
+
+    public void displayContactByCity(String city){
+        List<Contact>  contacts = cityMap.get(city.toLowerCase());
+        if (contacts!=null && !contacts.isEmpty()){
+            System.out.println("Contacts in "+city+":");
+            contacts.forEach(Contact::displayContact);
+        }else {
+            System.out.println("No contacts found in "+city+".");
+        }
+    }
+
+    public void displayContactByState(String state){
+        List<Contact> contacts = stateMap.get(state.toLowerCase());
+        if (contacts!=null && !contacts.isEmpty()){
+            System.out.println("Contacts in "+state+":");
+            contacts.forEach(Contact::displayContact);
+        }else {
+            System.out.println("No contacts found in "+state+".");
+        }
     }
 
     public List<Contact> getContact () {
@@ -232,9 +260,11 @@ class AddressBookManager {
                 System.out.println("3. Display Contacts in Address Book");
                 System.out.println("4. Edit Contact in Address Book");
                 System.out.println("5. Delete Available Address Books");
-                System.out.println("6. Display Available Address Books");
-                System.out.println("7. Search contacts by City or State");
-                System.out.println("8. Exit");
+                System.out.println("6. Search contacts by City or State");
+                System.out.println("7. Display Contacts by City");
+                System.out.println("8. Display Contacts by State");
+                System.out.println("9. Display Available Address Books");
+                System.out.println("10. Exit");
                 System.out.println("Choose an option: ");
                 option = scanner.nextLine();
 
@@ -250,9 +280,9 @@ class AddressBookManager {
                         System.out.println("Enter Address Book name: ");
                         String addBookName = scanner.nextLine();
                         AddressBook addBook = manager.getAddressBooks(addBookName);
-                        if (addBook!=null) {
+                        if (addBook != null) {
                             addBook.addContact();
-                        }else {
+                        } else {
                             System.out.println("Address Book not found.");
                         }
                         break;
@@ -261,9 +291,9 @@ class AddressBookManager {
                         System.out.println("Enter Address Book name: ");
                         String displayBookName = scanner.nextLine();
                         AddressBook displayBook = manager.getAddressBooks(displayBookName);
-                        if (displayBook!=null) {
+                        if (displayBook != null) {
                             displayBook.displayContact();
-                        }else {
+                        } else {
                             System.out.println("Address Book not found.");
                         }
                         break;
@@ -272,9 +302,9 @@ class AddressBookManager {
                         System.out.println("Enter Address Book name: ");
                         String editBookName = scanner.nextLine();
                         AddressBook editBook = manager.getAddressBooks(editBookName);
-                        if (editBook!=null) {
+                        if (editBook != null) {
                             editBook.editContact();
-                        }else {
+                        } else {
                             System.out.println("Address Book not found");
                         }
                         break;
@@ -284,36 +314,61 @@ class AddressBookManager {
                         System.out.println("Enter Address Book name: ");
                         String deleteBookName = scanner.nextLine();
                         AddressBook deleteBook = manager.getAddressBooks(deleteBookName);
-                        if (deleteBook!=null) {
+                        if (deleteBook != null) {
                             deleteBook.deleteContact();
-                        }else {
+                        } else {
                             System.out.println("Address Book not found.");
                         }
-                    break;
-
-                    case "6":
-                        manager.displayAddressBooks();
                         break;
 
-                    case "7":
+                    case "6":
                         System.out.println("Enter city to search");
                         String searchCity = scanner.nextLine();
                         System.out.println("Enter state to search: ");
                         String searchState = scanner.nextLine();
-                        List<Contact> searchResults = manager.searchByCityOrState(searchCity,searchState);
-                        if (searchResults.isEmpty()){
+                        List<Contact> searchResults = manager.searchByCityOrState(searchCity, searchState);
+                        if (searchResults.isEmpty()) {
                             System.out.println("No contacts found in the specified city or state.");
-                        }else {
+                        } else {
                             System.out.println("Search Results");
                             searchResults.forEach(Contact::displayContact);
                         }
                         break;
+                    case "7":
+                        System.out.println("Enter Address Book name: ");
+                        String cityBookName = scanner.nextLine();
+                        AddressBook cityBook = manager.getAddressBooks(cityBookName);
+                        if (cityBook != null) {
+                            System.out.println("Enter city to search: ");
+                            String city = scanner.nextLine();
+                            cityBook.displayContactByCity(city);
+                        } else {
+                            System.out.println("Address Book not found.");
+                        }
+                        break;
 
                     case "8":
+                        System.out.println("Enter Address Book name: ");
+                        String stateName = scanner.nextLine();
+                        AddressBook stateBook = manager.getAddressBooks(stateName);
+                        if (stateBook != null) {
+                            System.out.println("Enter State to search: ");
+                            String state = scanner.nextLine();
+                            stateBook.displayContactByState(state);
+                        } else {
+                            System.out.println("Address Book not found");
+                        }
+                        break;
+
+                    case "9":
+                        manager.displayAddressBooks();
+                        break;
+                    case "10":
 
                         System.out.println("Exiting...");
                         scanner.close();
                         return;
+
 
                     default:
                         System.out.println("Invalid Input");
