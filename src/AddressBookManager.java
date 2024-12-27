@@ -40,6 +40,9 @@ class Contact{
     public String getState(){
         return state;
     }
+    public int getZip(){
+        return zip;
+    }
 
     @Override
     public String toString(){
@@ -87,6 +90,7 @@ class Contact{
         System.out.println("Email: "+email);
     }
 }
+
 class AddressBook {
     private List<Contact> contactList;
     private Map<String, List<Contact>> cityMap;
@@ -175,6 +179,51 @@ class AddressBook {
 
     public long countContactsByState(String state){
         return stateMap.getOrDefault(state.toLowerCase(), Collections.emptyList()).size();
+    }
+
+    public void displaySortedContactByCity(){
+        List<Contact> sortedContacts = contactList.stream()
+                .sorted(Comparator.comparing(Contact::getCity)
+                                .thenComparing(Contact::getFirstname)
+                                .thenComparing(Contact::getLastname))
+                .collect(Collectors.toList());
+
+        if (sortedContacts.isEmpty()){
+            System.out.println("No contacts to display.");
+        }else{
+            System.out.println("\nSorted Address Book Contacts by City: ");
+            sortedContacts.forEach(System.out::println);
+        }
+    }
+
+    public void displaySortedContactByState(){
+        List<Contact> sortedContacts = contactList.stream()
+                .sorted(Comparator.comparing(Contact::getState)
+                        .thenComparing(Contact::getFirstname)
+                        .thenComparing(Contact::getLastname)).
+                collect(Collectors.toList());
+
+        if (sortedContacts.isEmpty()){
+            System.out.println("No contacts to display.");
+        }else {
+            System.out.println("\nSorted Address Book Contacts by State: ");
+            sortedContacts.forEach(System.out::println);
+        }
+    }
+
+    public void displayContactsBySortedZip(){
+        List<Contact> sortedContacts = contactList.stream()
+                .sorted(Comparator.comparingInt(Contact::getZip)
+                        .thenComparing(Contact::getFirstname)
+                        .thenComparing(Contact::getLastname))
+                .collect(Collectors.toList());
+
+        if (sortedContacts.isEmpty()){
+            System.out.println("No contacts to display.");
+        }else {
+            System.out.println("\nSorted Address Book Contacts by Zip: ");
+            sortedContacts.forEach(System.out::println);
+        }
     }
 
     public List<Contact> getContact () {
@@ -298,8 +347,9 @@ class AddressBookManager {
                 System.out.println("9. Count Contacts by City");
                 System.out.println("10. Count Contacts by State");
                 System.out.println("11. Display Sorted Contacts");
-                System.out.println("12. Display Available Address Books");
-                System.out.println("13. Exit");
+                System.out.println("12. Display Sorted Contacts by City,State,Zip");
+                System.out.println("13. Display Available Address Books");
+                System.out.println("14. Exit");
                 System.out.println("Choose an option: ");
                 option = scanner.nextLine();
 
@@ -433,14 +483,41 @@ class AddressBookManager {
                         break;
 
                     case "12":
+                        System.out.println("Enter the AddressBook name: ");
+                        String sortedBookName = scanner.nextLine();
+                        AddressBook sortName = manager.getAddressBooks(sortedBookName);
+                        if (sortedBookName!=null){
+                            System.out.println("Choose sorting criteria: ");
+                            System.out.println("1. Sort by City");
+                            System.out.println("2. Sort by State");
+                            System.out.println("3. Sort by Zip");
+                            String sortOption = scanner.nextLine();
+                            switch (sortOption){
+                                case "1":
+                                    sortName.displaySortedContactByCity();
+                                    break;
+                                case "2":
+                                    sortName.displaySortedContactByState();
+                                    break;
+                                case "3":
+                                    sortName.displayContactsBySortedZip();
+                                    break;
+                                default:
+                                    System.out.println("Invalid Option");
+                            }
+                        }else {
+                            System.out.println("Address Book not found.");
+                        }
+                        break;
+
+                    case "13":
                         manager.displayAddressBooks();
                         break;
-                    case "13":
+                    case "14":
 
                         System.out.println("Exiting...");
                         scanner.close();
                         return;
-
 
                     default:
                         System.out.println("Invalid Input");
