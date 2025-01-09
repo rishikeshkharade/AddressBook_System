@@ -2,9 +2,7 @@
 // click the <icon src="AllIcons.Actions.Execute"/> icon in the gutter.
 import org.w3c.dom.ls.LSOutput;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
+import java.io.*;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -40,8 +38,18 @@ class Contact{
     public String getState(){
         return state;
     }
-    public int getZip(){
+    public int getZip() {
         return zip;
+
+    }
+    public long getPhoneNumber(){
+        return phoneNumber;
+    }
+    public String getEmail(){
+        return email;
+    }
+    public String getAddress(){
+        return address;
     }
 
     @Override
@@ -75,7 +83,7 @@ class Contact{
         this.city = city;
         this.state = state;
         this.zip = zip;
-        this.phoneNumber = phoneNumber;
+        this.phoneNumber = phone_number;
         this.email = email;
     }
 
@@ -289,6 +297,36 @@ class AddressBook {
         System.out.println("Contacts not found.");
 
     }
+
+    public void writeContactsToFile(String fileName) {
+        try (BufferedWriter writer = new BufferedWriter(new FileWriter(fileName))) {
+            for (Contact contact : contactList) {
+                writer.write(contact.getFirstname() + "," + contact.getLastname() + "," + contact.getAddress() + "," + contact.getCity() + "," + contact.getState() + "," + contact.getZip() + "," + contact.getPhoneNumber() + "," + contact.getEmail());
+                writer.newLine();
+            }
+            System.out.println("Contacts written to file successfully.");
+        } catch (IOException e) {
+            System.out.println("An error occurred while writing to file: "+ e.getMessage());
+        }
+    }
+
+    public void readContactsFromFile(String filename) {
+        try(BufferedReader reader = new BufferedReader(new FileReader(filename))) {
+            String line;
+            while ((line = reader.readLine()) != null) {
+                String[] data = line.split(",");
+                if (data.length == 8) {
+                    Contact contact = new Contact(data[0], data[1], data[2], data[3], data[4], Integer.parseInt(data[5]), Long.parseLong(data[6]), data[7]);
+                    contactList.add(contact);
+                    cityMap.computeIfAbsent(data[3].toLowerCase(), k -> new ArrayList<>()).add(contact);
+                    stateMap.computeIfAbsent(data[4].toLowerCase(), k -> new ArrayList<>()).add(contact);
+                }
+            }
+            System.out.println("Contacts read from file successfully.");
+        } catch (IOException e) {
+            System.out.println("An error occurred while reading from file: "+ e.getMessage());
+        }
+    }
 }
 
 class AddressBookManager {
@@ -348,8 +386,10 @@ class AddressBookManager {
                 System.out.println("10. Count Contacts by State");
                 System.out.println("11. Display Sorted Contacts");
                 System.out.println("12. Display Sorted Contacts by City,State,Zip");
-                System.out.println("13. Display Available Address Books");
-                System.out.println("14. Exit");
+                System.out.println("13. Write Contacts to File");
+                System.out.println("14. Read Contacts from File");
+                System.out.println("15. Display Available Address Books");
+                System.out.println("16. Exit");
                 System.out.println("Choose an option: ");
                 option = scanner.nextLine();
 
@@ -511,9 +551,35 @@ class AddressBookManager {
                         break;
 
                     case "13":
+                        System.out.println("Enter the Address Book name: ");
+                        String writeBookName = scanner.nextLine();
+                        AddressBook writeBook = manager.getAddressBooks(writeBookName);
+                        if (writeBook != null) {
+                            System.out.println("Enter the file name: ");
+                            String fileName = scanner.nextLine();
+                            writeBook.writeContactsToFile(fileName);
+                        } else {
+                            System.out.println("Address Book not found.");
+                        }
+                        break;
+
+                        case "14":
+                        System.out.println("Enter the Address Book name: ");
+                        String readBookName = scanner.nextLine();
+                        AddressBook readBook = manager.getAddressBooks(readBookName);
+                        if (readBook != null) {
+                            System.out.println("Enter the file name: ");
+                            String fileName = scanner.nextLine();
+                            readBook.readContactsFromFile(fileName);
+                        } else {
+                            System.out.println("Address Book not found.");
+                        }
+                        break;
+
+                    case "15":
                         manager.displayAddressBooks();
                         break;
-                    case "14":
+                    case "16":
 
                         System.out.println("Exiting...");
                         scanner.close();
